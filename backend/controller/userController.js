@@ -2,6 +2,7 @@ const ErrorHandler = require("../utils/errorHandler");
 const catchAssyncError = require("../middleware/catchAssynceErors");
 const User = require("../models/userModel");
 const sendToken = require("../utils/jwtTokens");
+const catchAssynceErors = require("../middleware/catchAssynceErors");
 // const sendEmail = require("../utils/sendEmail"); 
 
 // register a user;
@@ -149,7 +150,7 @@ exports.updatePassword = catchAssyncError(async (req, res, next) => {
 exports.updateProfile = catchAssyncError( async (req, res, next) => {
     const newUserData = {
         name:req.body.name,
-        email:req.body.email
+        email:req.body.email,
     };
 
     // we will further add cloudinary
@@ -165,6 +166,45 @@ exports.updateProfile = catchAssyncError( async (req, res, next) => {
     })
 });
 
+// Admin have access to make any usesr admin
+exports.updateProfileByAdmin = catchAssyncError( async (req, res, next) => {
+    const newUserData = {
+        name:req.body.name,
+        email:req.body.email,
+        role:req.body.role,
+    };
+
+    // we will further add cloudinary
+
+    const user = await User.findByIdAndUpdate(req.user.id, newUserData, {
+        new:true,
+        runValidators:true,
+        useFindAndModify:false
+    })
+
+    res.status(200).json({
+        success : true,
+        user
+    })
+});
+
+exports.deleteUserByAdmin = catchAssynceErors(async (req, res, next) => {
+
+    const user = await User.findById(req.params.id);
+
+    if(!user){
+        return next(new ErrorHandler(`user is not found with id: ${req.params.id}`));
+    }
+
+    user.remove();
+
+    res.status(200).json({
+        success : true,
+        message: "user is deleted successfully! with respective id"
+    })
+})
+
+
 // get all user by admin
 
 exports.getAllUser = catchAssyncError(async (req, res, next) => {
@@ -177,7 +217,7 @@ exports.getAllUser = catchAssyncError(async (req, res, next) => {
 })
 
 // get single user by admin
-exports.getAllUser = catchAssyncError(async (req, res, next) => {
+exports.getSingleUser = catchAssyncError(async (req, res, next) => {
     const user = await User.findById(req.params.id);
 
     if(!user){

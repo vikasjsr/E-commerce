@@ -4,7 +4,10 @@ const {
     createProduct,
     updateProduct,
     deleteProduct,
-    getSingleProduct 
+    getSingleProduct,
+    createProductReview,
+    getAllReviews,
+    deleteReview
 } = require("../controller/productController");
 
 const { isAuthenticateUser,authorizeRole } = require("../middleware/auth");
@@ -22,7 +25,11 @@ router.route("/admin/products/:id")
 
 router.route("/products/:id").get(getSingleProduct);
 
+router.route("/review").put(isAuthenticateUser, createProductReview);
 
-
+// testing is remains to be checked
+router.route("/reviews")
+    .get(getAllReviews)
+    .delete(isAuthenticateUser, deleteReview);
 
 module.exports = router;
